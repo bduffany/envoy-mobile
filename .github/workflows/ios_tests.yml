@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - jp-test-bb-4
-  pull_request:
 
 jobs:
   swifttests:
@@ -32,28 +31,28 @@ jobs:
         env:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
         run: ./bazelw test --experimental_ui_max_stdouterr_bytes=10485760 --test_output=all --config=ios --build_tests_only --config=remote-ci-macos --remote_header="x-buildbuddy-api-key=$BUILDBUDDY_API_KEY" //test/swift/...
-  objctests:
-    name: c_and_objc_tests
-    runs-on: macos-12
-    timeout-minutes: 120
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          submodules: true
-      - id: check_context
-        name: 'Check whether to run'
-        run: |
-          if git rev-parse --abbrev-ref HEAD | grep -q ^main$ || git diff --name-only origin/main | grep -qe common/ -e objective-c/ -e swift/ -e bazel/ -e ^\.bazelrc$ -e ^envoy$ -e ^WORKSPACE$ -e ^.github/workflows/ios_tests.yml$ ; then
-            echo "Tests will run."
-            echo "::set-output name=run_tests::true"
-          else
-            echo "Skipping tests."
-            echo "::set-output name=run_tests::false"
-          fi
-      - name: 'Install dependencies'
-        run: ./ci/mac_ci_setup.sh
-      - name: 'Run Objective-C library tests'
-        if: steps.check_context.outputs.run_tests == 'true'
-        env:
-          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
-        run: ./bazelw test --test_output=all --config=ios --build_tests_only --config=remote-ci-macos --remote_header="x-buildbuddy-api-key=$BUILDBUDDY_API_KEY" //test/objective-c/...  //test/cc/unit:envoy_config_test
+  # objctests:
+  #   name: c_and_objc_tests
+  #   runs-on: macos-12
+  #   timeout-minutes: 120
+  #   steps:
+  #     - uses: actions/checkout@v1
+  #       with:
+  #         submodules: true
+  #     - id: check_context
+  #       name: 'Check whether to run'
+  #       run: |
+  #         if git rev-parse --abbrev-ref HEAD | grep -q ^main$ || git diff --name-only origin/main | grep -qe common/ -e objective-c/ -e swift/ -e bazel/ -e ^\.bazelrc$ -e ^envoy$ -e ^WORKSPACE$ -e ^.github/workflows/ios_tests.yml$ ; then
+  #           echo "Tests will run."
+  #           echo "::set-output name=run_tests::true"
+  #         else
+  #           echo "Skipping tests."
+  #           echo "::set-output name=run_tests::false"
+  #         fi
+  #     - name: 'Install dependencies'
+  #       run: ./ci/mac_ci_setup.sh
+  #     - name: 'Run Objective-C library tests'
+  #       if: steps.check_context.outputs.run_tests == 'true'
+  #       env:
+  #         BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+  #       run: ./bazelw test --test_output=all --config=ios --build_tests_only --config=remote-ci-macos --remote_header="x-buildbuddy-api-key=$BUILDBUDDY_API_KEY" //test/objective-c/...  //test/cc/unit:envoy_config_test
